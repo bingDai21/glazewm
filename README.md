@@ -1,3 +1,10 @@
+> [!NOTE]
+> This is a personal fork of [glzr-io/glazewm](https://github.com/glzr-io/glazewm).
+>
+> **Main changes:**
+> - Added a `toggle-zoom` command: minimizes all other windows in the current workspace so the focused window fills the entire workspace; toggling again restores the previously minimized windows to their original layout, with focus kept on the zoomed window.
+> - Added `NativeWindowWindowsExt::restore_no_activate` (Windows): restores minimized/maximized windows without activating them, so restored windows no longer steal focus.
+
 <div align="center">
 
 > V3 is finally out - check out the changelog [here](https://github.com/glzr-io/GlazeWM/releases) 🔥
