@@ -238,6 +238,21 @@ pub trait NativeWindowWindowsExt {
   /// This method is only available on Windows.
   fn restore(&self, outer_frame: Option<&Rect>) -> crate::Result<()>;
 
+  /// Restores the window (unminimizes and unmaximizes) without
+  /// activating it.
+  ///
+  /// Unlike [`NativeWindowWindowsExt::restore`], the window is not given
+  /// keyboard focus, which prevents it from stealing focus from the
+  /// currently focused window.
+  ///
+  /// # Platform-specific
+  ///
+  /// This method is only available on Windows.
+  fn restore_no_activate(
+    &self,
+    outer_frame: Option<&Rect>,
+  ) -> crate::Result<()>;
+
   /// Cloaks or uncloaks the window.
   ///
   /// # Platform-specific
@@ -378,6 +393,13 @@ impl NativeWindowWindowsExt for NativeWindow {
 
   fn restore(&self, outer_frame: Option<&Rect>) -> crate::Result<()> {
     self.inner.restore(outer_frame)
+  }
+
+  fn restore_no_activate(
+    &self,
+    outer_frame: Option<&Rect>,
+  ) -> crate::Result<()> {
+    self.inner.restore_no_activate(outer_frame)
   }
 
   fn set_cloaked(&self, cloaked: bool) -> crate::Result<()> {

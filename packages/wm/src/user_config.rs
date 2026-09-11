@@ -193,6 +193,20 @@ impl UserConfig {
     window_rules
   }
 
+  /// Creates a mock `UserConfig` with default config values for use in
+  /// tests.
+  #[cfg(test)]
+  pub fn mock() -> Self {
+    let value = ParsedConfig::default();
+
+    Self {
+      path: PathBuf::new(),
+      value_str: String::new(),
+      window_rules_by_event: Self::window_rules_by_event(&value),
+      value,
+    }
+  }
+
   fn window_rules_by_event(
     config_value: &ParsedConfig,
   ) -> HashMap<WindowRuleEvent, Vec<WindowRuleConfig>> {

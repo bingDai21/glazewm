@@ -34,9 +34,9 @@ use windows::{
         SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOCOPYBITS, SWP_NOMOVE,
         SWP_NOOWNERZORDER, SWP_NOSENDCHANGING, SWP_NOSIZE, SWP_NOZORDER,
         SWP_SHOWWINDOW, SW_HIDE, SW_MAXIMIZE, SW_MINIMIZE, SW_RESTORE,
-        SW_SHOWNA, WINDOWPLACEMENT, WINDOW_EX_STYLE, WINDOW_STYLE,
-        WM_CLOSE, WPF_ASYNCWINDOWPLACEMENT, WS_DLGFRAME, WS_EX_LAYERED,
-        WS_THICKFRAME,
+        SW_SHOWNA, SW_SHOWNOACTIVATE, WINDOWPLACEMENT, WINDOW_EX_STYLE,
+        WINDOW_STYLE, WM_CLOSE, WPF_ASYNCWINDOWPLACEMENT, WS_DLGFRAME,
+        WS_EX_LAYERED, WS_THICKFRAME,
       },
     },
   },
@@ -436,9 +436,36 @@ impl NativeWindow {
     &self,
     outer_frame: Option<&Rect>,
   ) -> crate::Result<()> {
+    self.restore_with_activation(outer_frame, true)
+  }
+
+  /// Implements [`NativeWindowWindowsExt::restore_no_activate`].
+  pub(crate) fn restore_no_activate(
+    &self,
+    outer_frame: Option<&Rect>,
+  ) -> crate::Result<()> {
+    self.restore_with_activation(outer_frame, false)
+  }
+
+  /// Shared implementation for restoring a minimized or maximized
+  /// window.
+  ///
+  /// When `activate` is `false`, the window is shown without being
+  /// activated, which prevents it from stealing focus.
+  fn restore_with_activation(
+    &self,
+    outer_frame: Option<&Rect>,
+    activate: bool,
+  ) -> crate::Result<()> {
+    let show_cmd = if activate {
+      SW_RESTORE
+    } else {
+      SW_SHOWNOACTIVATE
+    };
+
     match outer_frame {
       None => {
-        unsafe { ShowWindowAsync(self.hwnd(), SW_RESTORE) }.ok()?;
+        unsafe { ShowWindowAsync(self.hwnd(), show_cmd) }.ok()?;
         Ok(())
       }
       Some(rect) => {
@@ -446,7 +473,7 @@ impl NativeWindow {
           #[allow(clippy::cast_possible_truncation)]
           length: std::mem::size_of::<WINDOWPLACEMENT>() as u32,
           flags: WPF_ASYNCWINDOWPLACEMENT,
-          showCmd: SW_RESTORE.0 as u32,
+          showCmd: show_cmd.0.cast_unsigned(),
           rcNormalPosition: RECT {
             left: rect.left,
             top: rect.top,

@@ -16,6 +16,7 @@ use crate::{
   impl_tiling_direction_getters,
   models::{
     Container, DirectionContainer, TilingContainer, WindowContainer,
+    ZoomState,
   },
   traits::{CommonGetters, PositionGetters, TilingDirectionGetters},
 };
@@ -32,6 +33,7 @@ struct WorkspaceInner {
   config: WorkspaceConfig,
   gaps_config: GapsConfig,
   tiling_direction: TilingDirection,
+  zoom_state: Option<ZoomState>,
 }
 
 impl Workspace {
@@ -48,6 +50,7 @@ impl Workspace {
       config,
       gaps_config,
       tiling_direction,
+      zoom_state: None,
     };
 
     Self(Rc::new(RefCell::new(workspace)))
@@ -73,6 +76,16 @@ impl Workspace {
 
   pub fn set_gaps_config(&self, gaps_config: GapsConfig) {
     self.0.borrow_mut().gaps_config = gaps_config;
+  }
+
+  /// Zoom state of the workspace, if a window is currently zoomed.
+  pub fn zoom_state(&self) -> Option<ZoomState> {
+    self.0.borrow().zoom_state.clone()
+  }
+
+  /// Sets the zoom state of the workspace.
+  pub fn set_zoom_state(&self, zoom_state: Option<ZoomState>) {
+    self.0.borrow_mut().zoom_state = zoom_state;
   }
 
   /// Effective outer gaps for this workspace.

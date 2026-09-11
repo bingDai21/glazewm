@@ -285,9 +285,14 @@ fn redraw_containers(
       DisplayState::Showing | DisplayState::Shown
     );
 
-    if let Err(err) =
-      reposition_window(window, *hide_corner, &z_order, is_visible, config)
-    {
+    if let Err(err) = reposition_window(
+      window,
+      *hide_corner,
+      &z_order,
+      is_visible,
+      state,
+      config,
+    ) {
       tracing::warn!("Failed to set window position: {}", err);
     }
 
@@ -342,6 +347,9 @@ fn reposition_window(
   #[cfg_attr(not(target_os = "windows"), allow(unused_variables))]
   z_order: &WindowZOrder,
   is_visible: bool,
+  // LINT: `state` is only used on Windows.
+  #[cfg_attr(not(target_os = "windows"), allow(unused_variables))]
+  state: &WmState,
   config: &UserConfig,
 ) -> anyhow::Result<()> {
   let rect = window
@@ -418,7 +426,20 @@ fn reposition_window(
       if should_restore {
         // Restoring to position has the same effect as `ShowWindow` with
         // `SW_RESTORE`, but doesn't cause a flicker.
-        window.native().restore(Some(&rect))?;
+        //
+        // Windows that aren't the WM's focus target are restored without
+        // activation, since restoring would otherwise activate the
+        // window and steal focus (e.g. when restoring multiple windows
+        // via `toggle-zoom`).
+        let is_focus_target = state
+          .focused_container()
+          .is_some_and(|focused| focused.id() == window.id());
+
+        if is_focus_target {
+          window.native().restore(Some(&rect))?;
+        } else {
+          window.native().restore_no_activate(Some(&rect))?;
+        }
       }
 
       let mut swp_flags = SWP_NOACTIVATE

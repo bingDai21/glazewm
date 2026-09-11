@@ -27,7 +27,7 @@ use crate::{
     monitor::focus_monitor,
     window::{
       ignore_window, move_window_in_direction, move_window_to_workspace,
-      resize_window, set_window_position, set_window_size,
+      resize_window, set_window_position, set_window_size, toggle_zoom,
       update_window_state, WindowPositionTarget,
     },
     workspace::{
@@ -742,6 +742,12 @@ impl WindowManager {
           config,
           tiling_direction,
         )
+      }
+      InvokeCommand::ToggleZoom => {
+        match subject_container.as_window_container() {
+          Ok(window) => toggle_zoom(window, state, config),
+          _ => Ok(()),
+        }
       }
       InvokeCommand::WmCycleFocus {
         omit_floating,

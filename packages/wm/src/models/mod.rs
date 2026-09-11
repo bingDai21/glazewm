@@ -9,6 +9,7 @@ mod split_container;
 mod tiling_window;
 mod workspace;
 mod workspace_target;
+mod zoom_state;
 
 pub use container::*;
 pub use insertion_target::*;
@@ -21,3 +22,4 @@ pub use split_container::*;
 pub use tiling_window::*;
 pub use workspace::*;
 pub use workspace_target::*;
+pub use zoom_state::*;
